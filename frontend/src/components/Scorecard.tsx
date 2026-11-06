@@ -23,9 +23,9 @@ export default function Scorecard() {
     const lastEval = evals.length > 0 ? evals[evals.length - 1].metrics : null;
     const last100 = online.slice(-100);
     const avgReturn = last100.length > 0
-      ? last100.reduce((s: number, m: any) => s + (m.return ?? m.total_return ?? 0), 0) / last100.length
+      ? last100.reduce((acc: number, m: any) => acc + (m.return ?? 0), 0) / last100.length
       : 0;
-    const hazardHits = online.reduce((s: number, m: any) => s + (m.hazard_hits ?? 0), 0);
+    const hazardHits = online.reduce((acc: number, m: any) => acc + (m.hazard_hits ?? 0), 0);
 
     return {
       id: cfg.id,

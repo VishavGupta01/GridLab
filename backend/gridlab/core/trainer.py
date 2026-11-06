@@ -204,7 +204,7 @@ class LockstepTrainer:
             },
         }
 
-    def run_rollout(self, agent_idx: int, greedy: bool = True, seed: int = 0) -> list[dict]:
+    def run_rollout(self, agent_idx: int, greedy: bool = True, seed: int = 0) -> dict:
         agent = self.agents[agent_idx]
         rng = np.random.default_rng(seed)
 
@@ -212,6 +212,7 @@ class LockstepTrainer:
         s, _ = env.reset(seed=seed)
         trajectory = []
         done = False
+        reached_goal = False
 
         while not done:
             if greedy:
@@ -221,7 +222,8 @@ class LockstepTrainer:
 
             ns, r, terminated, truncated, info = env.step(a)
             done = terminated or truncated
+            reached_goal = terminated and not truncated
             trajectory.append({"s": s, "a": a, "r": float(r), "s2": ns, "done": done})
             s = ns
 
-        return trajectory
+        return {"steps": trajectory, "success": reached_goal}

@@ -8,7 +8,7 @@ export type TrainingState = 'idle' | 'running' | 'paused' | 'finished';
 export interface OnlineMetrics {
   steps: number;
   return: number;
-  success: boolean;
+  success: number;
   hazard_hits: number;
   eps: number;
   td: number;
@@ -167,8 +167,16 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
       if (msg.type === 'metrics') {
         const newHistory = { ...state.onlineHistory };
-        for (const [aid, m] of Object.entries(msg.agents) as [string, any][]) {
+        for (const [aid, raw] of Object.entries(msg.agents) as [string, any][]) {
           if (!newHistory[aid]) newHistory[aid] = [];
+          const m: OnlineMetrics = {
+            steps: raw.steps ?? 0,
+            return: raw.total_return ?? raw.return ?? 0,
+            success: raw.success ? 1 : 0,
+            hazard_hits: raw.hazard_hits ?? 0,
+            eps: raw.eps ?? 0,
+            td: raw.mean_abs_td_error ?? raw.td ?? 0,
+          };
           newHistory[aid] = [...newHistory[aid], m];
         }
         set({ onlineHistory: newHistory, episode: msg.episode });

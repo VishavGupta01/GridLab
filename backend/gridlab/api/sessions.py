@@ -190,16 +190,16 @@ class Session:
 
     def run_rollout(self, agent_id: str, greedy: bool = True, seed: int = 0) -> dict:
         idx = next((i for i, a in enumerate(self.agents) if a.agent_id == agent_id), 0)
-        trajectory = self.trainer.run_rollout(idx, greedy=greedy, seed=seed)
+        result = self.trainer.run_rollout(idx, greedy=greedy, seed=seed)
         sol = self.trainer._solution
+        trajectory = result["steps"]
         total_return = sum(step["r"] for step in trajectory)
-        success = trajectory[-1]["done"] if trajectory else False
 
         return {
             "agent_id": agent_id,
             "steps": trajectory,
             "total_return": total_return,
-            "success": success,
+            "success": result["success"],
             "optimal_steps": sol["bfs_shortest"] if sol else None,
         }
 

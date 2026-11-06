@@ -3,7 +3,7 @@ import { api } from '../api/client';
 import type { CellType } from '../store/gridStore';
 import { useGridStore } from '../store/gridStore';
 import { useSessionStore } from '../store/sessionStore';
-import { useUIStore } from '../store/uiStore';
+import { useUIStore, type OverlayType } from '../store/uiStore';
 
 const BRUSHES: { type: CellType; label: string; key: string; color: string }[] = [
   { type: '.', label: 'Erase', key: '1', color: 'bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-500' },
@@ -18,6 +18,7 @@ export function Toolbox() {
   const activeTool = useUIStore((s) => s.activeTool);
   const setTool = useUIStore((s) => s.setTool);
   const { nRows, nCols, resize, undo, redo, clear, setFromJSON, toJSON, stagedEdits, clearStaged } = useGridStore();
+  const validation = useGridStore((s) => s.validation);
   const sessionState = useSessionStore((s) => s.state);
   const sessionId = useSessionStore((s) => s.sessionId);
   const [presets, setPresets] = useState<string[]>([]);
@@ -165,6 +166,24 @@ export function Toolbox() {
         <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={importJSON} />
       </div>
 
+      {validation && (
+        <div className={`text-xs p-2 rounded ${
+          validation.valid && validation.solvable
+            ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+            : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+        }`}>
+          {validation.valid && validation.solvable ? (
+            <>
+              Solvable
+              {validation.optimal_path_length != null && <> &middot; Path: {validation.optimal_path_length}</>}
+              {validation.v_star_s0 != null && <> &middot; V*: {validation.v_star_s0.toFixed(1)}</>}
+            </>
+          ) : (
+            validation.issues.join(', ') || 'Invalid grid'
+          )}
+        </div>
+      )}
+
       {sessionState !== 'idle' && stagedEdits.length > 0 && (
         <button
           onClick={applyEdits}
@@ -173,6 +192,68 @@ export function Toolbox() {
           Apply Edits ({stagedEdits.length})
         </button>
       )}
+
+      <hr className="border-slate-200 dark:border-slate-700" />
+
+      <OverlayControls />
     </div>
+  );
+}
+
+const OVERLAYS: { id: OverlayType; label: string }[] = [
+  { id: 'none', label: 'None' },
+  { id: 'q_heatmap', label: 'Q-Value Heatmap' },
+  { id: 'policy', label: 'Policy Arrows' },
+  { id: 'visits', label: 'Visit Count' },
+  { id: 'td_error', label: 'TD Error' },
+  { id: 'optimal', label: 'Optimal (V*)' },
+  { id: 'disagreement', label: 'Disagreement' },
+];
+
+const AGENTS = [
+  { id: 'q', label: 'Q-Learning' },
+  { id: 's', label: 'SARSA' },
+  { id: 'e', label: 'Expected SARSA' },
+];
+
+function OverlayControls() {
+  const selectedOverlay = useUIStore((s) => s.selectedOverlay);
+  const setOverlay = useUIStore((s) => s.setOverlay);
+  const selectedAgent = useUIStore((s) => s.selectedAgent);
+  const setSelectedAgent = useUIStore((s) => s.setSelectedAgent);
+
+  return (
+    <>
+      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Overlay</div>
+      <select
+        value={selectedOverlay}
+        onChange={(e) => setOverlay(e.target.value as OverlayType)}
+        className="text-xs px-2 py-1 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
+      >
+        {OVERLAYS.map((o) => (
+          <option key={o.id} value={o.id}>{o.label}</option>
+        ))}
+      </select>
+      {selectedOverlay !== 'none' && selectedOverlay !== 'optimal' && selectedOverlay !== 'disagreement' && (
+        <>
+          <div className="text-xs text-slate-500 dark:text-slate-400">Agent</div>
+          <div className="flex flex-col gap-1">
+            {AGENTS.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => setSelectedAgent(a.id)}
+                className={`text-xs px-2 py-1 rounded text-left ${
+                  selectedAgent === a.id
+                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500'
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </>
   );
 }
