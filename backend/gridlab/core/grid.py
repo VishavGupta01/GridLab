@@ -180,10 +180,10 @@ def validate_grid(grid: Grid) -> list[str]:
     if len(goals) == 0:
         issues.append("No goal cell")
 
-    if grid.rows < 5 or grid.rows > 20:
-        issues.append(f"Rows must be 5-20, got {grid.rows}")
-    if grid.cols < 5 or grid.cols > 20:
-        issues.append(f"Cols must be 5-20, got {grid.cols}")
+    if grid.rows > 20:
+        issues.append(f"Rows must be at most 20, got {grid.rows}")
+    if grid.cols > 20:
+        issues.append(f"Cols must be at most 20, got {grid.cols}")
 
     return issues
 
