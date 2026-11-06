@@ -150,16 +150,17 @@ def greedy_path(
     return path, False
 
 
-_cache: dict[int, tuple[np.ndarray, np.ndarray, list[list[int]], int | None]] = {}
+_cache: dict[tuple, tuple[np.ndarray, np.ndarray, list[list[int]], int | None]] = {}
 
 
 def solve_grid(model: dict, grid_version: int) -> dict:
-    if grid_version in _cache:
-        V, Q, opt_actions, bfs_len = _cache[grid_version]
+    cache_key = (grid_version, model["n_states"], model["start"], tuple(sorted(model["goals"])))
+    if cache_key in _cache:
+        V, Q, opt_actions, bfs_len = _cache[cache_key]
     else:
         V, Q, opt_actions = value_iteration(model)
         bfs_len, _ = bfs_shortest_path(model)
-        _cache[grid_version] = (V, Q, opt_actions, bfs_len)
+        _cache[cache_key] = (V, Q, opt_actions, bfs_len)
 
     start = model["start"]
     path, reached = greedy_path(Q, start, model)
