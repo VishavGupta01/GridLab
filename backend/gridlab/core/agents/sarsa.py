@@ -19,6 +19,8 @@ class SarsaAgent(Agent):
 
     def explain_update(self, s: int, a: int, r: float, s2: int, terminated: bool, a2: int | None = None) -> dict:
         q_before = self._q[s].copy()
+        if a2 is None:
+            a2 = int(np.argmax(self._q[s2]))
         if terminated:
             target = r
             bootstrap_term = 0.0
