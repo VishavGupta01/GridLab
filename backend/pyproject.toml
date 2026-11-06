@@ -1,0 +1,31 @@
+[project]
+name = "gridlab"
+version = "0.1.0"
+description = "Interactive Arena for Comparing TD-Learning Agents"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104",
+    "uvicorn[standard]>=0.24",
+    "numpy>=1.24",
+    "gymnasium>=0.29",
+    "pydantic>=2.0",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "httpx>=0.25",
+    "websockets>=12.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
