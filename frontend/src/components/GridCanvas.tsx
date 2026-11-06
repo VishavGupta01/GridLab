@@ -257,9 +257,12 @@ export function GridCanvas() {
       />
       {hoverCell && (
         <div
-          className="absolute top-2 right-2 bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded shadow pointer-events-none"
+          className="absolute top-2 right-2 bg-white/95 dark:bg-slate-800/95 text-xs px-3 py-2 rounded shadow-lg pointer-events-none space-y-1 min-w-[180px]"
         >
-          ({hoverCell.r}, {hoverCell.c}) {rows[hoverCell.r]?.[hoverCell.c] ?? '?'}
+          <div className="font-medium text-slate-700 dark:text-slate-200">
+            ({hoverCell.r}, {hoverCell.c}) {rows[hoverCell.r]?.[hoverCell.c] ?? '?'}
+          </div>
+          <QPopover state={hoverCell.r * nCols + hoverCell.c} agentSnapshots={agentSnapshots} optimalSnapshot={optimalSnapshot} />
         </div>
       )}
     </div>
@@ -413,4 +416,42 @@ function drawArrows(
     ctx.closePath();
     ctx.fill();
   }
+}
+
+const ACTIONS = ['Up', 'Right', 'Down', 'Left'];
+const Q_AGENT_NAMES: Record<string, string> = { q: 'Q-Lrn', s: 'SARSA', e: 'E-SARSA' };
+const Q_AGENT_COLORS: Record<string, string> = { q: '#3b82f6', s: '#ef4444', e: '#22c55e' };
+
+function QPopover({ state, agentSnapshots, optimalSnapshot }: { state: number; agentSnapshots: Record<string, any>; optimalSnapshot: any }) {
+  const agents = Object.entries(agentSnapshots);
+  if (agents.length === 0) return null;
+
+  const optActions = optimalSnapshot?.policy?.[state] as number[] | undefined;
+
+  return (
+    <div className="space-y-1">
+      {agents.map(([aid, snap]) => {
+        const q = snap?.q?.[state] as number[] | undefined;
+        if (!q) return null;
+        const maxA = q.indexOf(Math.max(...q));
+        return (
+          <div key={aid}>
+            <div className="font-medium" style={{ color: Q_AGENT_COLORS[aid] }}>{Q_AGENT_NAMES[aid] || aid}</div>
+            <div className="grid grid-cols-4 gap-x-2 tabular-nums text-[10px] text-slate-600 dark:text-slate-400">
+              {ACTIONS.map((name, i) => (
+                <span key={i} className={`${i === maxA ? 'font-bold text-slate-800 dark:text-slate-100' : ''} ${optActions?.includes(i) ? 'underline' : ''}`}>
+                  {name}: {q[i].toFixed(1)}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {optActions && (
+        <div className="text-[10px] text-purple-500 dark:text-purple-400">
+          Optimal: {optActions.map((a: number) => ACTIONS[a]).join(', ')}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -198,6 +198,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
           events: [...state.events, msg],
           gridVersion: msg.grid_version,
         });
+        if (msg.edits) {
+          const gridState = useGridStore.getState();
+          for (const edit of msg.edits as { r: number; c: number; to: string }[]) {
+            gridState.setCell(edit.r, edit.c, edit.to as any);
+          }
+          gridState.clearStaged();
+        }
       } else if (msg.type === 'status') {
         set({
           state: msg.state,
