@@ -157,6 +157,16 @@ function MetricChart({ title, dataKey, domain }: ChartProps) {
 }
 
 export default function Charts() {
+  const hasData = Object.values(useSessionStore.getState().onlineHistory).some((h) => h.length > 0);
+
+  if (!hasData) {
+    return (
+      <div className="flex items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+        Start training to see learning curves.
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 overflow-y-auto" style={{ maxHeight: '500px' }}>
       <MetricChart title="Steps per Episode" dataKey="steps" />

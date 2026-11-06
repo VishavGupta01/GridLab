@@ -1,0 +1,32 @@
+name: E5 Adaptation
+description: Shortcut opens at episode 500 - with and without eps-bump
+grid:
+  preset: shortcut
+agents:
+  - id: q
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: decaying_epsilon, eps0: 1.0, eps_min: 0.01, decay: 0.995}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_bump
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: decaying_epsilon, eps0: 1.0, eps_min: 0.01, decay: 0.995}
+    q_init: 0
+    eps_bump_on_change: true
+    eps_bump_value: 0.5
+  - id: s_bump
+    algo: sarsa
+    alpha: 0.1
+    exploration: {type: decaying_epsilon, eps0: 1.0, eps_min: 0.01, decay: 0.995}
+    q_init: 0
+    eps_bump_on_change: true
+    eps_bump_value: 0.5
+budget: 2000
+eval_every: 10
+scheduled_events:
+  - at_episode: 500
+    edits:
+      - {r: 5, c: 5, to: "."}

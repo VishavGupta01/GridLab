@@ -1,0 +1,34 @@
+name: E1 Cliff Walking Contrast
+description: Classic cliff walking - Q-learning vs SARSA vs Expected SARSA
+grid:
+  preset: cliff_4x12
+agents:
+  - id: q
+    algo: q_learning
+    alpha: 0.1
+    exploration:
+      type: epsilon
+      eps: 0.1
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: s
+    algo: sarsa
+    alpha: 0.1
+    exploration:
+      type: epsilon
+      eps: 0.1
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: e
+    algo: expected_sarsa
+    alpha: 0.1
+    exploration:
+      type: epsilon
+      eps: 0.1
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+budget: 2000
+eval_every: 10

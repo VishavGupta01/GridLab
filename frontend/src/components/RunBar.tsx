@@ -8,6 +8,7 @@ export function RunBar() {
 
   return (
     <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shrink-0">
+      <span className="text-sm font-bold text-slate-700 dark:text-slate-200 mr-2">GridLab</span>
       <div className="flex items-center gap-1">
         {state === 'idle' || state === 'finished' ? (
           <button onClick={start} className="px-3 py-1 text-sm font-medium rounded bg-green-500 hover:bg-green-600 text-white">

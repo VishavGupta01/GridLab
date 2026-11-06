@@ -28,6 +28,9 @@ def run_single_seed(
 ) -> dict:
     if "preset" in grid_data:
         grid = load_preset(grid_data["preset"])
+        if "settings_override" in grid_data:
+            for k, v in grid_data["settings_override"].items():
+                grid.settings[k] = v
     else:
         grid = parse_grid(grid_data)
 

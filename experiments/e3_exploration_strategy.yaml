@@ -1,0 +1,28 @@
+name: E3 Exploration Strategy Comparison
+description: Fixed epsilon vs decaying epsilon vs softmax on maze_10x10
+grid:
+  preset: maze_10x10
+agents:
+  - id: q_fixed
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_decay
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: decaying_epsilon, eps0: 1.0, eps_min: 0.01, decay: 0.995}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_soft
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: softmax, tau: 1.0}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+budget: 3000
+eval_every: 10

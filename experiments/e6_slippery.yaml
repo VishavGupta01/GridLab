@@ -1,0 +1,30 @@
+name: E6 Slippery Transitions (slip=0.1)
+description: Cliff walking with slip_prob=0.1
+grid:
+  preset: cliff_4x12
+  settings_override:
+    slip_prob: 0.1
+agents:
+  - id: q
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: s
+    algo: sarsa
+    alpha: 0.1
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: e
+    algo: expected_sarsa
+    alpha: 0.1
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+budget: 2000
+eval_every: 10

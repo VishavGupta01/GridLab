@@ -1,0 +1,42 @@
+name: E2 Learning Rate Sensitivity
+description: Effect of alpha on cliff_4x12 across algorithms
+grid:
+  preset: cliff_4x12
+agents:
+  - id: q_a05
+    algo: q_learning
+    alpha: 0.05
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_a10
+    algo: q_learning
+    alpha: 0.1
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_a30
+    algo: q_learning
+    alpha: 0.3
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_a50
+    algo: q_learning
+    alpha: 0.5
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+  - id: q_a100
+    algo: q_learning
+    alpha: 1.0
+    exploration: {type: epsilon, eps: 0.1}
+    q_init: 0
+    eps_bump_on_change: false
+    eps_bump_value: 0.3
+budget: 2000
+eval_every: 10
