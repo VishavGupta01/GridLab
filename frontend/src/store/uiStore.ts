@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { CellType } from './gridStore';
 
 export type OverlayType = 'none' | 'q_heatmap' | 'policy' | 'visits' | 'td_error' | 'optimal' | 'disagreement';
-export type TabType = 'charts' | 'race' | 'scorecard' | 'adaptation' | 'inspector' | 'export';
+export type TabType = 'charts' | 'race' | 'adaptation';
 
 export interface UIState {
   activeTool: CellType;

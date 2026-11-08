@@ -169,11 +169,8 @@ export default function Charts() {
 
   return (
     <div className="p-3 overflow-y-auto" style={{ maxHeight: '500px' }}>
-      <MetricChart title="Steps per Episode" dataKey="steps" />
       <MetricChart title="Return per Episode" dataKey="return" />
-      <MetricChart title="Optimality Gap" dataKey="gap" />
-      <MetricChart title="Success Rate" dataKey="success" domain={[0, 1]} />
-      <MetricChart title="Epsilon" dataKey="eps" domain={[0, 1]} />
+      <MetricChart title="Optimality Gap (V* - V_pi)" dataKey="gap" />
       <MetricChart title="% Optimal Actions" dataKey="pct_optimal" domain={[0, 1]} />
     </div>
   );

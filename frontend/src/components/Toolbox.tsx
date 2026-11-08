@@ -10,8 +10,6 @@ const BRUSHES: { type: CellType; label: string; key: string; color: string }[] =
   { type: '#', label: 'Wall', key: '2', color: 'bg-slate-800 dark:bg-slate-400' },
   { type: 'S', label: 'Start', key: '3', color: 'bg-blue-500' },
   { type: 'G', label: 'Goal', key: '4', color: 'bg-green-500' },
-  { type: 'H', label: 'Hazard', key: '5', color: 'bg-red-500' },
-  { type: 'M', label: 'Mud', key: '6', color: 'bg-amber-600' },
 ];
 
 export function Toolbox() {
@@ -32,7 +30,7 @@ export function Toolbox() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
       const idx = parseInt(e.key);
-      if (idx >= 1 && idx <= 6) {
+      if (idx >= 1 && idx <= 4) {
         setTool(BRUSHES[idx - 1].type);
         e.preventDefault();
       }

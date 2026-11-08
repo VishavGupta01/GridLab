@@ -95,15 +95,6 @@ export function AgentCard({ config, color, index }: AgentCardProps) {
         <Row label="q0" value={config.q_init} disabled={disabled} onChange={(v) => update({ q_init: v })} />
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={config.eps_bump_on_change}
-          onChange={(e) => update({ eps_bump_on_change: e.target.checked })}
-          className="rounded border-slate-300 dark:border-slate-600"
-        />
-        <span className="text-[11px] text-slate-600 dark:text-slate-300">{'ε'}-bump on edit</span>
-      </label>
     </div>
   );
 }

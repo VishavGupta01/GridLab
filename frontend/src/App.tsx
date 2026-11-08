@@ -3,10 +3,8 @@ import AdaptationPanel from './components/AdaptationPanel';
 import { AgentCard } from './components/AgentCard';
 import Charts from './components/Charts';
 import { GridCanvas } from './components/GridCanvas';
-import Inspector from './components/Inspector';
 import RaceView from './components/RaceView';
 import { RunBar } from './components/RunBar';
-import Scorecard from './components/Scorecard';
 import { Toolbox } from './components/Toolbox';
 import { useGridStore } from './store/gridStore';
 import { useSessionStore } from './store/sessionStore';
@@ -17,9 +15,7 @@ const AGENT_COLORS = ['#3b82f6', '#ef4444', '#22c55e'];
 const TABS: { id: TabType; label: string }[] = [
   { id: 'charts', label: 'Learning Curves' },
   { id: 'race', label: 'Race' },
-  { id: 'scorecard', label: 'Scorecard' },
   { id: 'adaptation', label: 'Adaptation' },
-  { id: 'inspector', label: 'Inspector' },
 ];
 
 function App() {
@@ -31,7 +27,7 @@ function App() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
 
-      const toolKeys: Record<string, string> = { '1': '#', '2': 'S', '3': 'G', '4': 'H', '5': 'M', '6': '.' };
+      const toolKeys: Record<string, string> = { '1': '.', '2': '#', '3': 'S', '4': 'G' };
       if (toolKeys[e.key]) {
         e.preventDefault();
         useUIStore.getState().setTool(toolKeys[e.key] as any);
@@ -96,9 +92,7 @@ function App() {
         <div className="overflow-auto" style={{ maxHeight: 'calc(45vh - 40px)' }}>
           {activeTab === 'charts' && <Charts />}
           {activeTab === 'race' && <RaceView />}
-          {activeTab === 'scorecard' && <Scorecard />}
           {activeTab === 'adaptation' && <AdaptationPanel />}
-          {activeTab === 'inspector' && <Inspector />}
         </div>
       </div>
     </div>
