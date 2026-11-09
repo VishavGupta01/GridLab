@@ -170,8 +170,8 @@ export const useGridStore = create<GridState>((set, get) => ({
   },
 
   resize: (newR, newC) => {
-    newR = Math.max(5, Math.min(20, newR));
-    newC = Math.max(5, Math.min(20, newC));
+    newR = Math.max(5, Math.min(30, newR));
+    newC = Math.max(5, Math.min(30, newC));
     const { rows, undoStack } = get();
     const resized: string[][] = [];
     for (let r = 0; r < newR; r++) {

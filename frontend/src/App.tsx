@@ -27,7 +27,7 @@ function App() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
 
-      const toolKeys: Record<string, string> = { '1': '.', '2': '#', '3': 'S', '4': 'G' };
+      const toolKeys: Record<string, string> = { '1': '.', '2': '#', '3': 'S', '4': 'G', '5': 'H', '6': 'M' };
       if (toolKeys[e.key]) {
         e.preventDefault();
         useUIStore.getState().setTool(toolKeys[e.key] as any);

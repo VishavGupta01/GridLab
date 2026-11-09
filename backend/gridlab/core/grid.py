@@ -100,8 +100,8 @@ class Grid:
         }
 
     def resize(self, new_rows: int, new_cols: int) -> Grid:
-        new_rows = max(5, min(20, new_rows))
-        new_cols = max(5, min(20, new_cols))
+        new_rows = max(5, min(30, new_rows))
+        new_cols = max(5, min(30, new_cols))
         new_cells = []
         for r in range(new_rows):
             row = []
@@ -180,10 +180,10 @@ def validate_grid(grid: Grid) -> list[str]:
     if len(goals) == 0:
         issues.append("No goal cell")
 
-    if grid.rows > 20:
-        issues.append(f"Rows must be at most 20, got {grid.rows}")
-    if grid.cols > 20:
-        issues.append(f"Cols must be at most 20, got {grid.cols}")
+    if grid.rows > 30:
+        issues.append(f"Rows must be at most 30, got {grid.rows}")
+    if grid.cols > 30:
+        issues.append(f"Cols must be at most 30, got {grid.cols}")
 
     return issues
 

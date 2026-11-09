@@ -10,6 +10,8 @@ const BRUSHES: { type: CellType; label: string; key: string; color: string }[] =
   { type: '#', label: 'Wall', key: '2', color: 'bg-slate-800 dark:bg-slate-400' },
   { type: 'S', label: 'Start', key: '3', color: 'bg-blue-500' },
   { type: 'G', label: 'Goal', key: '4', color: 'bg-green-500' },
+  { type: 'H', label: 'Hazard', key: '5', color: 'bg-red-400' },
+  { type: 'M', label: 'Mud', key: '6', color: 'bg-amber-600' },
 ];
 
 export function Toolbox() {
@@ -30,7 +32,7 @@ export function Toolbox() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
       const idx = parseInt(e.key);
-      if (idx >= 1 && idx <= 4) {
+      if (idx >= 1 && idx <= 6) {
         setTool(BRUSHES[idx - 1].type);
         e.preventDefault();
       }
@@ -116,13 +118,13 @@ export function Toolbox() {
       <div className="flex gap-2 items-center">
         <label className="text-xs text-slate-500 dark:text-slate-400">R</label>
         <input
-          type="number" min={5} max={20} value={nRows}
+          type="number" min={5} max={30} value={nRows}
           onChange={(e) => resize(+e.target.value, nCols)}
           className="w-12 px-1 py-0.5 text-xs border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
         />
         <label className="text-xs text-slate-500 dark:text-slate-400">C</label>
         <input
-          type="number" min={5} max={20} value={nCols}
+          type="number" min={5} max={30} value={nCols}
           onChange={(e) => resize(nRows, +e.target.value)}
           className="w-12 px-1 py-0.5 text-xs border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
         />

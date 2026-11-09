@@ -47,7 +47,7 @@ export interface SessionState {
   onlineHistory: Record<string, OnlineMetrics[]>;
   evalHistory: Record<string, { episode: number; metrics: EvalMetrics }[]>;
   agentSnapshots: Record<string, AgentSnapshot>;
-  optimalSnapshot: { v: number[]; q: number[][]; policy: number[][] } | null;
+  optimalSnapshot: { v: number[]; q: number[][]; policy: number[][]; greedy_path?: number[] } | null;
   events: GridEvent[];
 
   ws: WebSocket | null;
@@ -64,9 +64,9 @@ export interface SessionState {
 }
 
 const DEFAULT_AGENTS: AgentConfig[] = [
-  { id: 'q', algo: 'q_learning', alpha: 0.1, exploration: { type: 'epsilon', eps: 0.1 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3 },
-  { id: 's', algo: 'sarsa', alpha: 0.1, exploration: { type: 'epsilon', eps: 0.1 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3 },
-  { id: 'e', algo: 'expected_sarsa', alpha: 0.1, exploration: { type: 'epsilon', eps: 0.1 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3 },
+  { id: 'q', algo: 'q_learning', alpha: 0.1, exploration: { type: 'decaying_epsilon', eps0: 1.0, eps_min: 0.05, decay: 0.995 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3, enabled: true },
+  { id: 's', algo: 'sarsa', alpha: 0.1, exploration: { type: 'decaying_epsilon', eps0: 1.0, eps_min: 0.05, decay: 0.995 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3, enabled: true },
+  { id: 'e', algo: 'expected_sarsa', alpha: 0.1, exploration: { type: 'decaying_epsilon', eps0: 1.0, eps_min: 0.05, decay: 0.995 }, q_init: 0, eps_bump_on_change: false, eps_bump_value: 0.3, enabled: true },
 ];
 
 export const useSessionStore = create<SessionState>((set, get) => ({

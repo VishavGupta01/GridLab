@@ -88,6 +88,7 @@ export interface AgentConfig {
   q_init: number;
   eps_bump_on_change: boolean;
   eps_bump_value: number;
+  enabled: boolean;
 }
 
 export interface SessionCreate {

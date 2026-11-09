@@ -38,6 +38,12 @@ export function AgentCard({ config, color, index }: AgentCardProps) {
   return (
     <div className="p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
       <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={config.enabled}
+          onChange={(e) => update({ enabled: e.target.checked })}
+          className="rounded accent-blue-500"
+        />
         <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
         <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{config.id.toUpperCase()}</span>
       </div>

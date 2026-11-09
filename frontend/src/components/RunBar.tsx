@@ -4,7 +4,7 @@ import { useUIStore } from '../store/uiStore';
 export function RunBar() {
   const { state, episode, budget, speed, gridVersion, start, pause, resume, reset, setSpeed } = useSessionStore();
   const { darkMode, toggleDarkMode } = useUIStore();
-  const setBudget = (v: number) => useSessionStore.setState({ budget: Math.max(100, Math.min(50000, v)) });
+  const setBudget = (v: number) => useSessionStore.setState({ budget: Math.max(1, Math.min(50000, v)) });
 
   return (
     <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shrink-0">
@@ -46,7 +46,7 @@ export function RunBar() {
         <div className="flex items-center gap-1">
           <span className="text-xs text-slate-500 dark:text-slate-400">Budget</span>
           <input
-            type="number" min={100} max={50000} step={100} value={budget}
+            type="number" min={1} max={50000} step={100} value={budget}
             onChange={(e) => setBudget(+e.target.value)}
             className="w-20 text-xs px-1.5 py-0.5 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
           />

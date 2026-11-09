@@ -59,12 +59,14 @@ function MetricChart({ title, description, dataKey, domain }: ChartProps) {
   const onlineHistory = useSessionStore((s) => s.onlineHistory);
   const evalHistory = useSessionStore((s) => s.evalHistory);
   const events = useSessionStore((s) => s.events);
+  const enabledKey = useSessionStore((s) => s.agentConfigs.filter((a) => a.enabled).map((a) => a.id).join(','));
   const [smoothing, setSmoothing] = useState(20);
 
   const isEval = ['gap', 'gap_pct', 'path_ratio', 'pct_optimal'].includes(dataKey);
+  const enabledIds = useMemo(() => new Set(enabledKey.split(',').filter(Boolean)), [enabledKey]);
 
   const chartData = useMemo(() => {
-    const agentIds = Object.keys(isEval ? evalHistory : onlineHistory);
+    const agentIds = Object.keys(isEval ? evalHistory : onlineHistory).filter((id) => enabledIds.has(id));
     if (agentIds.length === 0) return [];
 
     if (isEval) {
@@ -105,9 +107,9 @@ function MetricChart({ title, description, dataKey, domain }: ChartProps) {
       data.push(point);
     }
     return downsample(data, 500);
-  }, [onlineHistory, evalHistory, dataKey, smoothing, isEval]);
+  }, [onlineHistory, evalHistory, dataKey, smoothing, isEval, enabledIds]);
 
-  const agentIds = Object.keys(isEval ? evalHistory : onlineHistory);
+  const agentIds = Object.keys(isEval ? evalHistory : onlineHistory).filter((id) => enabledIds.has(id));
 
   return (
     <div className="mb-4">

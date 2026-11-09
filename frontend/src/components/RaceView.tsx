@@ -158,21 +158,23 @@ export default function RaceView() {
   const sessionId = useSessionStore((s) => s.sessionId);
   const agentConfigs = useSessionStore((s) => s.agentConfigs);
   const episode = useSessionStore((s) => s.episode);
+  const optimalPath = useSessionStore((s) => s.optimalSnapshot?.greedy_path ?? null);
   const nRows = useGridStore((s) => s.nRows);
   const nCols = useGridStore((s) => s.nCols);
   const rows = useGridStore((s) => s.rows);
   const dark = false;
 
   const [rollouts, setRollouts] = useState<Record<string, RolloutResult>>({});
-  const [optimalPath, setOptimalPath] = useState<number[] | null>(null);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [greedy, setGreedy] = useState(true);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<number | undefined>(undefined);
   const prevEpisodeRef = useRef(0);
 
-  const maxSteps = Math.max(...Object.values(rollouts).map((r) => r.steps.length), 0);
+  const enabledConfigs = agentConfigs.filter((c) => c.enabled);
+  const enabledIds = new Set(enabledConfigs.map((c) => c.id));
+  const enabledRollouts = Object.fromEntries(Object.entries(rollouts).filter(([id]) => enabledIds.has(id)));
+  const maxSteps = Math.max(...Object.values(enabledRollouts).map((r) => r.steps.length), 0);
 
   const fetchRollouts = useCallback(async () => {
     if (!sessionId) return;
@@ -180,20 +182,14 @@ export default function RaceView() {
     const results: Record<string, RolloutResult> = {};
     for (const cfg of agentConfigs) {
       try {
-        results[cfg.id] = await api.rollout(sessionId, cfg.id, greedy, 0);
+        results[cfg.id] = await api.rollout(sessionId, cfg.id, true, 0);
       } catch { /* skip */ }
     }
-    try {
-      const snap = await api.snapshot(sessionId);
-      if (snap?.optimal?.greedy_path) {
-        setOptimalPath(snap.optimal.greedy_path);
-      }
-    } catch { /* skip */ }
     setRollouts(results);
     setStep(0);
     setPlaying(false);
     setLoading(false);
-  }, [sessionId, agentConfigs, greedy]);
+  }, [sessionId, agentConfigs]);
 
   useEffect(() => {
     if (sessionId && episode > 0 && episode - prevEpisodeRef.current >= 50) {
@@ -212,13 +208,13 @@ export default function RaceView() {
   }, [playing, step, maxSteps]);
 
   const winner = (() => {
-    const finished = Object.entries(rollouts)
+    const finished = Object.entries(enabledRollouts)
       .filter(([, r]) => r.success)
       .sort((a, b) => a[1].steps.length - b[1].steps.length);
     return finished.length > 0 ? finished[0][0] : null;
   })();
 
-  const hasRollouts = Object.keys(rollouts).length > 0;
+  const hasRollouts = Object.keys(enabledRollouts).length > 0;
 
   if (!sessionId) {
     return (
@@ -236,7 +232,7 @@ export default function RaceView() {
           disabled={loading}
           className="px-4 py-2 text-sm font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
         >
-          {loading ? 'Loading...' : 'Fetch Rollouts'}
+          {loading ? 'Running...' : 'Run Race'}
         </button>
 
         {hasRollouts && (
@@ -253,50 +249,44 @@ export default function RaceView() {
             >
               Reset
             </button>
+
+            <div className="flex-1 flex items-center gap-2 min-w-48">
+              <input
+                type="range" min={0} max={Math.max(maxSteps - 1, 0)} value={step}
+                onChange={(e) => { setStep(Number(e.target.value)); setPlaying(false); }}
+                className="flex-1 accent-blue-500"
+              />
+              <span className="text-sm font-mono text-slate-500 w-16 text-right">
+                {step + 1} / {maxSteps}
+              </span>
+            </div>
           </>
-        )}
-
-        <label className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400 ml-2">
-          <input type="checkbox" checked={greedy} onChange={(e) => setGreedy(e.target.checked)} className="rounded" />
-          Greedy policy
-        </label>
-
-        {hasRollouts && (
-          <div className="flex-1 flex items-center gap-2 min-w-48">
-            <input
-              type="range" min={0} max={Math.max(maxSteps - 1, 0)} value={step}
-              onChange={(e) => { setStep(Number(e.target.value)); setPlaying(false); }}
-              className="flex-1 accent-blue-500"
-            />
-            <span className="text-sm font-mono text-slate-500 w-16 text-right">
-              {step + 1} / {maxSteps}
-            </span>
-          </div>
         )}
       </div>
 
-      {hasRollouts && (
-        <div className="flex gap-4 justify-center flex-wrap">
-          {optimalPath && optimalPath.length > 0 && (
-            <div className="flex flex-col items-center">
-              <div className="rounded-xl p-1 ring-2 ring-purple-400 dark:ring-purple-600 shadow-md shadow-purple-200/30">
-                <OptimalPathGrid
-                  path={optimalPath} nRows={nRows} nCols={nCols} rows={rows} dark={dark}
-                />
+      <div className="flex gap-4 justify-center flex-wrap">
+        {optimalPath && optimalPath.length > 0 && (
+          <div className="flex flex-col items-center">
+            <div className="rounded-xl p-1 ring-2 ring-purple-400 dark:ring-purple-600 shadow-md shadow-purple-200/30">
+              <OptimalPathGrid
+                path={optimalPath} nRows={nRows} nCols={nCols} rows={rows} dark={dark}
+              />
+            </div>
+            <div className="mt-2 text-center">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a855f7' }} />
+                <span className="text-sm font-semibold text-purple-500">Optimal</span>
               </div>
-              <div className="mt-2 text-center">
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a855f7' }} />
-                  <span className="text-sm font-semibold text-purple-500">Optimal</span>
-                </div>
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-                  {optimalPath.length - 1} steps
-                </div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+                {optimalPath.length - 1} steps
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {agentConfigs.map((cfg) => {
+      {hasRollouts && (
+        <>
+          {enabledConfigs.map((cfg) => {
             const r = rollouts[cfg.id];
             const isWinner = cfg.id === winner;
             const color = AGENT_COLORS[cfg.id] || '#666';
@@ -338,8 +328,9 @@ export default function RaceView() {
               </div>
             );
           })}
-        </div>
+        </>
       )}
+      </div>
     </div>
   );
 }
