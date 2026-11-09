@@ -13,6 +13,25 @@ const CELL_COLORS_DARK: Record<string, string> = {
   '.': '#1e293b', '#': '#475569', S: '#3b82f6', G: '#4ade80', H: '#f87171', M: '#ca8a04',
 };
 
+const CANVAS_SIZE = 220;
+
+function drawGrid(ctx: CanvasRenderingContext2D, nRows: number, nCols: number, rows: string[][], dark: boolean) {
+  const cellSize = Math.min(ctx.canvas.width / nCols, ctx.canvas.height / nRows);
+  const colors = dark ? CELL_COLORS_DARK : CELL_COLORS;
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  for (let r = 0; r < nRows; r++) {
+    for (let c = 0; c < nCols; c++) {
+      const cell = rows[r]?.[c] ?? '.';
+      ctx.fillStyle = colors[cell] || colors['.'];
+      ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      ctx.strokeStyle = dark ? '#334155' : '#cbd5e1';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+    }
+  }
+  return cellSize;
+}
+
 function RaceMiniGrid({ rollout, nRows, nCols, rows, step, color, dark }: {
   rollout: RolloutResult | null; nRows: number; nCols: number; rows: string[][]; step: number; color: string; dark: boolean;
 }) {
@@ -24,21 +43,7 @@ function RaceMiniGrid({ rollout, nRows, nCols, rows, step, color, dark }: {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const cellSize = Math.min(canvas.width / nCols, canvas.height / nRows);
-    const colors = dark ? CELL_COLORS_DARK : CELL_COLORS;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let r = 0; r < nRows; r++) {
-      for (let c = 0; c < nCols; c++) {
-        const cell = rows[r]?.[c] ?? '.';
-        ctx.fillStyle = colors[cell] || colors['.'];
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        ctx.strokeStyle = dark ? '#334155' : '#cbd5e1';
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
-      }
-    }
+    const cellSize = drawGrid(ctx, nRows, nCols, rows, dark);
 
     if (rollout && rollout.steps.length > 0) {
       const trail = rollout.steps.slice(0, step + 1);
@@ -89,7 +94,7 @@ function RaceMiniGrid({ rollout, nRows, nCols, rows, step, color, dark }: {
     }
   }, [rollout, nRows, nCols, rows, step, color, dark]);
 
-  return <canvas ref={canvasRef} width={300} height={300} className="rounded-lg" />;
+  return <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="rounded-lg" />;
 }
 
 function OptimalPathGrid({ path, nRows, nCols, rows, dark }: {
@@ -103,22 +108,8 @@ function OptimalPathGrid({ path, nRows, nCols, rows, dark }: {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const cellSize = Math.min(canvas.width / nCols, canvas.height / nRows);
-    const colors = dark ? CELL_COLORS_DARK : CELL_COLORS;
+    const cellSize = drawGrid(ctx, nRows, nCols, rows, dark);
     const color = '#a855f7';
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let r = 0; r < nRows; r++) {
-      for (let c = 0; c < nCols; c++) {
-        const cell = rows[r]?.[c] ?? '.';
-        ctx.fillStyle = colors[cell] || colors['.'];
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        ctx.strokeStyle = dark ? '#334155' : '#cbd5e1';
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
-      }
-    }
 
     for (let i = 0; i < path.length; i++) {
       const s = path[i];
@@ -160,7 +151,7 @@ function OptimalPathGrid({ path, nRows, nCols, rows, dark }: {
     }
   }, [path, nRows, nCols, rows, dark]);
 
-  return <canvas ref={canvasRef} width={300} height={300} className="rounded-lg" />;
+  return <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="rounded-lg" />;
 }
 
 export default function RaceView() {
@@ -239,7 +230,7 @@ export default function RaceView() {
 
   return (
     <div className="p-4">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
         <button
           onClick={fetchRollouts}
           disabled={loading}
@@ -271,7 +262,7 @@ export default function RaceView() {
         </label>
 
         {hasRollouts && (
-          <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 min-w-48">
             <input
               type="range" min={0} max={Math.max(maxSteps - 1, 0)} value={step}
               onChange={(e) => { setStep(Number(e.target.value)); setPlaying(false); }}
@@ -285,7 +276,26 @@ export default function RaceView() {
       </div>
 
       {hasRollouts && (
-        <div className="flex gap-6 justify-center">
+        <div className="flex gap-4 justify-center flex-wrap">
+          {optimalPath && optimalPath.length > 0 && (
+            <div className="flex flex-col items-center">
+              <div className="rounded-xl p-1 ring-2 ring-purple-400 dark:ring-purple-600 shadow-md shadow-purple-200/30">
+                <OptimalPathGrid
+                  path={optimalPath} nRows={nRows} nCols={nCols} rows={rows} dark={dark}
+                />
+              </div>
+              <div className="mt-2 text-center">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a855f7' }} />
+                  <span className="text-sm font-semibold text-purple-500">Optimal</span>
+                </div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+                  {optimalPath.length - 1} steps
+                </div>
+              </div>
+            </div>
+          )}
+
           {agentConfigs.map((cfg) => {
             const r = rollouts[cfg.id];
             const isWinner = cfg.id === winner;
@@ -328,27 +338,6 @@ export default function RaceView() {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {hasRollouts && optimalPath && optimalPath.length > 0 && (
-        <div className="flex justify-center mt-6">
-          <div className="flex flex-col items-center">
-            <div className="rounded-xl p-1 ring-1 ring-purple-300 dark:ring-purple-700">
-              <OptimalPathGrid
-                path={optimalPath} nRows={nRows} nCols={nCols} rows={rows} dark={dark}
-              />
-            </div>
-            <div className="mt-2 text-center">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a855f7' }} />
-                <span className="text-sm font-semibold text-purple-500">Optimal Path</span>
-              </div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-                {optimalPath.length - 1} steps (mathematically optimal)
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
