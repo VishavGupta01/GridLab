@@ -92,6 +92,77 @@ function RaceMiniGrid({ rollout, nRows, nCols, rows, step, color, dark }: {
   return <canvas ref={canvasRef} width={300} height={300} className="rounded-lg" />;
 }
 
+function OptimalPathGrid({ path, nRows, nCols, rows, dark }: {
+  path: number[]; nRows: number; nCols: number; rows: string[][]; dark: boolean;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const cellSize = Math.min(canvas.width / nCols, canvas.height / nRows);
+    const colors = dark ? CELL_COLORS_DARK : CELL_COLORS;
+    const color = '#a855f7';
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < nRows; r++) {
+      for (let c = 0; c < nCols; c++) {
+        const cell = rows[r]?.[c] ?? '.';
+        ctx.fillStyle = colors[cell] || colors['.'];
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        ctx.strokeStyle = dark ? '#334155' : '#cbd5e1';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
+
+    for (let i = 0; i < path.length; i++) {
+      const s = path[i];
+      const tr = Math.floor(s / nCols);
+      const tc = s % nCols;
+      const opacity = 0.15 + 0.5 * (i / Math.max(path.length - 1, 1));
+      ctx.fillStyle = color;
+      ctx.globalAlpha = opacity;
+      ctx.fillRect(tc * cellSize + 1, tr * cellSize + 1, cellSize - 2, cellSize - 2);
+    }
+    ctx.globalAlpha = 1;
+
+    if (path.length >= 2) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      for (let i = 0; i < path.length; i++) {
+        const s = path[i];
+        const tr = Math.floor(s / nCols);
+        const tc = s % nCols;
+        const cx = tc * cellSize + cellSize / 2;
+        const cy = tr * cellSize + cellSize / 2;
+        if (i === 0) ctx.moveTo(cx, cy);
+        else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    if (path.length > 0) {
+      const last = path[path.length - 1];
+      const lr = Math.floor(last / nCols);
+      const lc = last % nCols;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(lc * cellSize + cellSize / 2, lr * cellSize + cellSize / 2, cellSize * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }, [path, nRows, nCols, rows, dark]);
+
+  return <canvas ref={canvasRef} width={300} height={300} className="rounded-lg" />;
+}
+
 export default function RaceView() {
   const sessionId = useSessionStore((s) => s.sessionId);
   const agentConfigs = useSessionStore((s) => s.agentConfigs);
@@ -102,11 +173,12 @@ export default function RaceView() {
   const dark = false;
 
   const [rollouts, setRollouts] = useState<Record<string, RolloutResult>>({});
+  const [optimalPath, setOptimalPath] = useState<number[] | null>(null);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [greedy, setGreedy] = useState(true);
   const [loading, setLoading] = useState(false);
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number | undefined>(undefined);
   const prevEpisodeRef = useRef(0);
 
   const maxSteps = Math.max(...Object.values(rollouts).map((r) => r.steps.length), 0);
@@ -120,6 +192,12 @@ export default function RaceView() {
         results[cfg.id] = await api.rollout(sessionId, cfg.id, greedy, 0);
       } catch { /* skip */ }
     }
+    try {
+      const snap = await api.snapshot(sessionId);
+      if (snap?.optimal?.greedy_path) {
+        setOptimalPath(snap.optimal.greedy_path);
+      }
+    } catch { /* skip */ }
     setRollouts(results);
     setStep(0);
     setPlaying(false);
@@ -253,9 +331,24 @@ export default function RaceView() {
         </div>
       )}
 
-      {hasRollouts && rollouts[Object.keys(rollouts)[0]]?.optimal_steps != null && (
-        <div className="text-center text-xs text-slate-400 dark:text-slate-500 mt-3">
-          Optimal path: {rollouts[Object.keys(rollouts)[0]]?.optimal_steps} steps
+      {hasRollouts && optimalPath && optimalPath.length > 0 && (
+        <div className="flex justify-center mt-6">
+          <div className="flex flex-col items-center">
+            <div className="rounded-xl p-1 ring-1 ring-purple-300 dark:ring-purple-700">
+              <OptimalPathGrid
+                path={optimalPath} nRows={nRows} nCols={nCols} rows={rows} dark={dark}
+              />
+            </div>
+            <div className="mt-2 text-center">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a855f7' }} />
+                <span className="text-sm font-semibold text-purple-500">Optimal Path</span>
+              </div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+                {optimalPath.length - 1} steps (mathematically optimal)
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -42,13 +42,20 @@ function ema(data: number[], window: number): number[] {
   return result;
 }
 
+const CHART_DESCRIPTIONS: Record<string, string> = {
+  'return': 'Total reward collected per episode. Higher is better. Q-learning often scores lower near hazards due to risky exploration, while SARSA learns safer paths with higher training returns.',
+  'gap': 'Difference between the mathematically optimal value (V*) and each agent\'s greedy policy value. Lower means closer to optimal. Q-learning typically converges to a smaller gap (finds the true optimum) while SARSA converges to a safer but suboptimal policy.',
+  'pct_optimal': 'Fraction of states where the agent\'s greedy action matches the optimal action. Higher means better policy quality. Approaches 1.0 as agents converge.',
+};
+
 interface ChartProps {
   title: string;
+  description?: string;
   dataKey: string;
   domain?: [number | 'auto', number | 'auto'];
 }
 
-function MetricChart({ title, dataKey, domain }: ChartProps) {
+function MetricChart({ title, description, dataKey, domain }: ChartProps) {
   const onlineHistory = useSessionStore((s) => s.onlineHistory);
   const evalHistory = useSessionStore((s) => s.evalHistory);
   const events = useSessionStore((s) => s.events);
@@ -121,6 +128,9 @@ function MetricChart({ title, dataKey, domain }: ChartProps) {
           </label>
         )}
       </div>
+      {description && (
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-1 leading-snug">{description}</p>
+      )}
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -169,9 +179,9 @@ export default function Charts() {
 
   return (
     <div className="p-3 overflow-y-auto" style={{ maxHeight: '500px' }}>
-      <MetricChart title="Return per Episode" dataKey="return" />
-      <MetricChart title="Optimality Gap (V* - V_pi)" dataKey="gap" />
-      <MetricChart title="% Optimal Actions" dataKey="pct_optimal" domain={[0, 1]} />
+      <MetricChart title="Return per Episode" description={CHART_DESCRIPTIONS['return']} dataKey="return" />
+      <MetricChart title="Optimality Gap (V* - V_pi)" description={CHART_DESCRIPTIONS['gap']} dataKey="gap" />
+      <MetricChart title="% Optimal Actions" description={CHART_DESCRIPTIONS['pct_optimal']} dataKey="pct_optimal" domain={[0, 1]} />
     </div>
   );
 }

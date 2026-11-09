@@ -2,7 +2,6 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { useGridStore } from '../store/gridStore';
 import { useSessionStore } from '../store/sessionStore';
 import { useUIStore } from '../store/uiStore';
-import type { CellType } from '../store/gridStore';
 import type { OverlayType } from '../store/uiStore';
 
 const CELL_COLORS: Record<string, string> = {
@@ -279,7 +278,7 @@ function drawOverlay(
   nRows: number,
   nCols: number,
   cellSize: number,
-  darkMode: boolean
+  _darkMode: boolean
 ) {
   if (overlay === 'none') return;
 

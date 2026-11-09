@@ -201,6 +201,7 @@ class LockstepTrainer:
                 "v": sol["V"].tolist(),
                 "q": sol["Q"].tolist(),
                 "policy": sol["optimal_actions"],
+                "greedy_path": sol["greedy_path"],
             },
         }
 
